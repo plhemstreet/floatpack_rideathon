@@ -12,8 +12,9 @@ export interface Team {
 export enum ChallengeStatus {
   AVAILABLE = 'available',
   ACTIVE = 'active',
-  COMPLETED = 'completed',
   FORFEITED = 'forfeited',
+  PENDING = 'pending',
+  COMPLETE = 'complete',
 }
 
 export interface Challenge {
@@ -29,15 +30,18 @@ export interface Challenge {
   status: ChallengeStatus;
   team_id?: number | null;
   created_at?: string;
+  modifiers?: Modifier[];
+  offsets?: Offset[];
+  challenge_attempt_modifier?: Modifier;
 }
 
 export interface Modifier {
   id: number;
   multiplier: number;
   creator_id: number;
-  receiver_id: number;
+  receiver_id?: number;
   challenge_id?: number | null;
-  created_at: string;
+  created_at?: string;
   start?: string | null;
   end?: string | null;
 }
@@ -46,9 +50,9 @@ export interface Offset {
   id: number;
   distance: number;
   creator_id: number;
-  receiver_id: number;
+  receiver_id?: number;
   challenge_id?: number | null;
-  created_at: string;
+  created_at?: string;
 }
 
 export interface GpxUpload {
@@ -98,4 +102,35 @@ export interface ChallengeSubmission {
   status: 'pending' | 'approved' | 'rejected';
   reviewed_by?: number;
   created_at: string;
+}
+
+// Configuration types for defaultConfig
+export interface ChallengeConfig {
+  name: string;
+  description: string;
+  pause_distance: boolean;
+  latitude: number;
+  longitude: number;
+  modifiers?: {
+    multiplier: number;
+    creator_id: number | null;
+    receiver_id: number | null;
+    challenge_id: number | null;
+    start: string | null;
+    end: string | null;
+  }[];
+  offsets?: {
+    distance: number;
+    creator_id: number | null;
+    receiver_id: number | null;
+    challenge_id: number | null;
+  }[];
+  challenge_attempt_modifier?: {
+    multiplier: number;
+    creator_id: number | null;
+    receiver_id: number | null;
+    challenge_id: number | null;
+    start: string | null;
+    end: string | null;
+  };
 }

@@ -77,7 +77,7 @@ export default function ChallengesScreen({ navigation }: ChallengesScreenProps) 
         return 'status-available';
       case ChallengeStatus.ACTIVE:
         return 'status-active';
-      case ChallengeStatus.COMPLETED:
+      case ChallengeStatus.COMPLETE:
         return 'status-completed';
       case ChallengeStatus.FORFEITED:
         return 'status-forfeited';
@@ -87,7 +87,7 @@ export default function ChallengesScreen({ navigation }: ChallengesScreenProps) 
   };
 
   const isChallengeDisabled = (status: ChallengeStatus) => {
-    return status === ChallengeStatus.COMPLETED || status === ChallengeStatus.FORFEITED;
+    return status === ChallengeStatus.COMPLETE || status === ChallengeStatus.FORFEITED;
   };
 
   if (isLoading) {
@@ -219,6 +219,72 @@ export default function ChallengesScreen({ navigation }: ChallengesScreenProps) 
                       </View>
                     )}
                   </View>
+
+                  {/* Modifiers and Offsets Section */}
+                  {(challenge.modifiers && challenge.modifiers.length > 0) || 
+                   (challenge.offsets && challenge.offsets.length > 0) || 
+                   challenge.challenge_attempt_modifier ? (
+                    <View className="bg-sunset-50 rounded-2xl p-4 mb-6">
+                      <Text className={`text-lg font-bold mb-4 ${
+                        isDisabled ? 'text-sunset-300' : 'text-sunset-800'
+                      }`}>
+                        Challenge Bonuses & Modifiers
+                      </Text>
+                      
+                      <View className="space-y-3">
+                        {/* Challenge Attempt Modifier */}
+                        {challenge.challenge_attempt_modifier && (
+                          <View className="flex-row items-center justify-between bg-green-100 rounded-xl p-3">
+                            <View className="flex-row items-center">
+                              <View className="w-8 h-8 bg-green-500 rounded-xl items-center justify-center mr-3">
+                                <Ionicons name="star" size={16} color="white" />
+                              </View>
+                              <Text className="text-green-800 font-semibold">
+                                Attempt Bonus
+                              </Text>
+                            </View>
+                            <Text className="text-green-700 font-bold">
+                              {challenge.challenge_attempt_modifier.multiplier}x
+                            </Text>
+                          </View>
+                        )}
+
+                        {/* Regular Modifiers */}
+                        {challenge.modifiers && challenge.modifiers.map((modifier, index) => (
+                          <View key={index} className="flex-row items-center justify-between bg-blue-100 rounded-xl p-3">
+                            <View className="flex-row items-center">
+                              <View className="w-8 h-8 bg-blue-500 rounded-xl items-center justify-center mr-3">
+                                <Ionicons name="trending-up" size={16} color="white" />
+                              </View>
+                              <Text className="text-blue-800 font-semibold">
+                                Modifier {index + 1}
+                              </Text>
+                            </View>
+                            <Text className="text-blue-700 font-bold">
+                              {modifier.multiplier}x
+                            </Text>
+                          </View>
+                        ))}
+
+                        {/* Offsets */}
+                        {challenge.offsets && challenge.offsets.map((offset, index) => (
+                          <View key={index} className="flex-row items-center justify-between bg-purple-100 rounded-xl p-3">
+                            <View className="flex-row items-center">
+                              <View className="w-8 h-8 bg-purple-500 rounded-xl items-center justify-center mr-3">
+                                <Ionicons name="speedometer" size={16} color="white" />
+                              </View>
+                              <Text className="text-purple-800 font-semibold">
+                                Distance Offset
+                              </Text>
+                            </View>
+                            <Text className="text-purple-700 font-bold">
+                              +{offset.distance} mi
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  ) : null}
 
                   {/* Card Footer */}
                   <View className="flex-row items-center justify-between pt-4 border-t border-sunset-200">

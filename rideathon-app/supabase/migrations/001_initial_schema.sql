@@ -23,10 +23,10 @@ CREATE TABLE challenges (
     uuid UUID UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
     pause_distance BOOLEAN NOT NULL DEFAULT true,
     start TIMESTAMP WITH TIME ZONE,
-    end TIMESTAMP WITH TIME ZONE,
+    "end" TIMESTAMP WITH TIME ZONE,
     latitude DOUBLE PRECISION NOT NULL DEFAULT 0.0,
     longitude DOUBLE PRECISION NOT NULL DEFAULT 0.0,
-    status VARCHAR(20) NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'active', 'completed', 'forfeited')),
+    status VARCHAR(20) NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'active', 'forfeited','pending', 'complete')),
     team_id INTEGER REFERENCES teams(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -40,12 +40,12 @@ CREATE INDEX idx_challenges_status ON challenges(status);
 CREATE TABLE modifiers (
     id SERIAL PRIMARY KEY,
     multiplier DOUBLE PRECISION NOT NULL,
-    creator_id INTEGER NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
-    receiver_id INTEGER NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    creator_id INTEGER REFERENCES teams(id) ON DELETE CASCADE,
+    receiver_id INTEGER REFERENCES teams(id) ON DELETE CASCADE,
     challenge_id INTEGER REFERENCES challenges(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     start TIMESTAMP WITH TIME ZONE,
-    end TIMESTAMP WITH TIME ZONE
+    "end" TIMESTAMP WITH TIME ZONE
 );
 
 -- Create indexes
@@ -57,8 +57,8 @@ CREATE INDEX idx_modifiers_challenge_id ON modifiers(challenge_id);
 CREATE TABLE offsets (
     id SERIAL PRIMARY KEY,
     distance DOUBLE PRECISION NOT NULL,
-    creator_id INTEGER NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
-    receiver_id INTEGER NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    creator_id INTEGER REFERENCES teams(id) ON DELETE CASCADE,
+    receiver_id INTEGER REFERENCES teams(id) ON DELETE CASCADE,
     challenge_id INTEGER REFERENCES challenges(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -176,12 +176,13 @@ RETURNS TABLE (
     uuid UUID,
     pause_distance BOOLEAN,
     start TIMESTAMP WITH TIME ZONE,
-    end TIMESTAMP WITH TIME ZONE,
+    "end" TIMESTAMP WITH TIME ZONE,
     latitude DOUBLE PRECISION,
     longitude DOUBLE PRECISION,
     status VARCHAR(20)
 ) AS $$
 BEGIN
+
     RETURN QUERY
     SELECT 
         c.id,

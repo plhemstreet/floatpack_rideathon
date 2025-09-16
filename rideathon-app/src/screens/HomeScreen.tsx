@@ -4,16 +4,33 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  StyleSheet,
   Alert,
   Linking,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView , SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../stores/useAuthStore';
 
 export default function HomeScreen() {
   const { team, logout } = useAuthStore();
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      paddingHorizontal: 10,
+    },
+    button: {
+      alignItems: 'center',
+      backgroundColor: '#DDDDDD',
+      padding: 10,
+    },
+    countContainer: {
+      alignItems: 'center',
+      padding: 10,
+    },
+  });
   const handlePhoneCall = () => {
     const phoneNumber = '18008675309';
     Linking.openURL(`tel:${phoneNumber}`);
@@ -116,6 +133,7 @@ export default function HomeScreen() {
         <TouchableOpacity
           onPress={handleLogout}
           className="sunset-button-secondary mt-8 mb-20"
+          style={styles.button}
         >
           <Text className="text-white text-center font-bold text-xl">
             Logout
