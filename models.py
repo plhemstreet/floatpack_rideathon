@@ -8,6 +8,8 @@ from datamodels.team import Team
 from datamodels.challenge import Challenge, ChallengeStatus
 from datamodels.modifier import Modifier
 from datamodels.offset import Offset
+from datamodels.gpx_upload import GpxUpload
+from datamodels.scorecard import Scorecard
 
 # Export all models for easy importing
 __all__ = [
@@ -15,5 +17,7 @@ __all__ = [
     'Challenge', 
     'ChallengeStatus',
     'Modifier',
-    'Offset'
+    'Offset',
+    'GpxUpload',
+    'Scorecard'
 ]
