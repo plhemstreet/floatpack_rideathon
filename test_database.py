@@ -230,7 +230,7 @@ class TestDatabaseModels(unittest.TestCase):
         
         self.db.commit()
     
-
+    def test_challenge_forfeit(self):
         """Test challenge forfeit with penalty creation"""
         # Create team and challenge
         team = Team(

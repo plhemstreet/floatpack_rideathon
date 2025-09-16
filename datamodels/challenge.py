@@ -12,6 +12,10 @@ class ChallengeStatus(enum.Enum):
     FORFEITED = "forfeited"
 
 class Challenge(Base):
+    """A challenge is a task that a team can complete to create offsets or modifies for themselves or other teams.
+    Starting a challenge creates a modifier with multiplier=0 by defaultto nullfiy distance earned during the challenge attempt.
+    Forfeiting a challenge creates an offset of -5 miles by default to penalize the team for failing to complete the challenge.
+    """
     __tablename__ = "challenges"
     
     id = Column(Integer, primary_key=True, index=True)
@@ -60,7 +64,7 @@ class Challenge(Base):
             if db_session:
                 db_session.commit()
     
-    def forfeit_challenge(self, db_session, failure_penalty: float = 5, bonus_offsets: list = [], bonus_modifiers: list = []):
+    def forfeit_challenge(self, db_session, failure_penalty: float = -5, bonus_offsets: list = [], bonus_modifiers: list = []):
         self.status = ChallengeStatus.FORFEITED
         self.end = datetime.now()
         if self.pause_distance and self.modifiers:
