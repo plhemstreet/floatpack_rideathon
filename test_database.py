@@ -419,6 +419,91 @@ class TestDatabaseModels(unittest.TestCase):
             self.assertIsNotNone(challenge.team_id)
             self.assertEqual(len(challenge.modifiers), 1)
             self.assertEqual(len(challenge.offsets), 1)
+    
+    def test_challenge_lifecycle_scenarios(self):
+        """Test challenge lifecycle with success and forfeit scenarios using existing data"""
+        # First populate the sample data
+        self.test_populate_full_sample_data()
+        
+        # Use teams and challenges from the sample data
+        teams = self.db.query(Team).all()
+        challenges = self.db.query(Challenge).all()
+        
+        # Get the first two teams
+        team1 = teams[0]  # The Speedsters
+        team2 = teams[1]  # The Strategists
+        
+        # Get Mountain Climb challenges for both teams
+        challenge1 = self.db.query(Challenge).filter(
+            Challenge.name == "Mountain Climb",
+            Challenge.team_id == team1.id
+        ).first()
+        
+        challenge2 = self.db.query(Challenge).filter(
+            Challenge.name == "Mountain Climb", 
+            Challenge.team_id == team2.id
+        ).first()
+        
+        # Verify we found the challenges
+        self.assertIsNotNone(challenge1)
+        self.assertIsNotNone(challenge2)
+        self.assertEqual(challenge1.status, ChallengeStatus.AVAILABLE)
+        self.assertEqual(challenge2.status, ChallengeStatus.AVAILABLE)
+        
+        # Team1 starts the challenge
+        challenge1.start_challenge(team1.id)
+        self.assertEqual(challenge1.status, ChallengeStatus.ACTIVE)
+        self.assertEqual(challenge1.team_id, team1.id)
+        self.assertIsNotNone(challenge1.start)
+        
+        # Team2 starts the challenge
+        challenge2.start_challenge(team2.id)
+        self.assertEqual(challenge2.status, ChallengeStatus.ACTIVE)
+        self.assertEqual(challenge2.team_id, team2.id)
+        self.assertIsNotNone(challenge2.start)
+        
+        self.db.commit()
+        
+        # Simulate time passing - Team1 succeeds after 5 seconds
+        import time
+        time.sleep(0.1)  # Small delay to simulate time passing
+        challenge1.complete_challenge()
+        self.assertEqual(challenge1.status, ChallengeStatus.COMPLETED)
+        self.assertIsNotNone(challenge1.end)
+        
+        # Simulate time passing - Team2 forfeits after 6 seconds
+        time.sleep(0.1)  # Small delay to simulate time passing
+        challenge2.forfeit_challenge(team2.id, self.db, failure_penalty=2.0)
+        self.assertEqual(challenge2.status, ChallengeStatus.FORFEITED)
+        self.assertIsNotNone(challenge2.end)
+        
+        self.db.commit()
+        
+        # Verify the final states
+        self.assertEqual(challenge1.status, ChallengeStatus.COMPLETED)
+        self.assertEqual(challenge2.status, ChallengeStatus.FORFEITED)
+        
+        # Verify forfeit penalty was created
+        forfeit_offset = self.db.query(Offset).filter(
+            Offset.distance == 2.0,
+            Offset.creator_id == team2.id,
+            Offset.receiver_id == team2.id,
+            Offset.challenge_id == challenge2.id
+        ).first()
+        self.assertIsNotNone(forfeit_offset)
+        
+        # Verify timing (end times should be different)
+        self.assertIsNotNone(challenge1.end)
+        self.assertIsNotNone(challenge2.end)
+        self.assertNotEqual(challenge1.end, challenge2.end)
+        
+        # Verify both challenges have modifiers (original + start_challenge modifier)
+        self.assertEqual(len(challenge1.modifiers), 2)  # Original + start modifier
+        self.assertEqual(len(challenge2.modifiers), 2)  # Original + start modifier
+        
+        # Verify challenge1 has only original offsets, challenge2 has original + forfeit penalty
+        self.assertEqual(len(challenge1.offsets), 1)  # Only original offset
+        self.assertEqual(len(challenge2.offsets), 2)  # Original + forfeit penalty
 
 
 if __name__ == '__main__':
