@@ -17,3 +17,4 @@ class Team(Base):
     modifiers_received = relationship("Modifier", foreign_keys="Modifier.receiver_id", back_populates="receiver")
     offsets_created = relationship("Offset", foreign_keys="Offset.creator_id", back_populates="creator")
     offsets_received = relationship("Offset", foreign_keys="Offset.receiver_id", back_populates="receiver")
+    gpx_uploads = relationship("GpxUpload", back_populates="team")
