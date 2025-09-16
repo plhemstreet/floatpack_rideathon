@@ -31,7 +31,7 @@ class Challenge(Base):
     modifiers = relationship("Modifier", back_populates="challenge")
     offsets = relationship("Offset", back_populates="challenge")
 
-    def start_challenge(self, team_id: int):
+    def start_challenge(self, team_id: int, db_session=None):
         self.status = ChallengeStatus.ACTIVE
         self.start = datetime.now()
         self.team_id = team_id
@@ -39,43 +39,54 @@ class Challenge(Base):
             from datamodels.modifier import Modifier
             challenge_attempt_modifier = Modifier(
                 multiplier=0,
-                creator_id=team_id,
-                receiver_id=team_id,
+                creator_id=self.team_id,
+                receiver_id=self.team_id,
                 challenge_id=self.id,
+                start=datetime.now(),
             )
+            if db_session:
+                db_session.add(challenge_attempt_modifier)
+                db_session.flush()  # Get the ID
             self.modifiers.append(challenge_attempt_modifier)
 
-    def complete_challenge(self):
+    def complete_challenge(self, db_session=None):
         self.status = ChallengeStatus.COMPLETED
         self.end = datetime.now()
         if self.pause_distance and self.modifiers:
-            self.modifiers[0].end = datetime.now()
+            # Find the challenge attempt modifier (multiplier=0)
+            challenge_attempt_modifier = next((m for m in self.modifiers if m.multiplier == 0), None)
+            if challenge_attempt_modifier:
+                challenge_attempt_modifier.end = datetime.now()
+            if db_session:
+                db_session.commit()
     
-    def forfeit_challenge(self, team_id: int, db_session, failure_penalty: float = 5, bonus_offsets: list = [], bonus_modifiers: list = []):
+    def forfeit_challenge(self, db_session, failure_penalty: float = 5, bonus_offsets: list = [], bonus_modifiers: list = []):
         self.status = ChallengeStatus.FORFEITED
         self.end = datetime.now()
         if self.pause_distance and self.modifiers:
-            self.modifiers[0].end = datetime.now()
+            # Find the challenge attempt modifier (multiplier=0)
+            challenge_attempt_modifier = next((m for m in self.modifiers if m.multiplier == 0), None)
+            if challenge_attempt_modifier:
+                challenge_attempt_modifier.end = datetime.now()
+            if db_session:
+                db_session.commit()
 
         from datamodels.offset import Offset
         failure_penalty_offset = Offset(
             distance=failure_penalty,
-            creator_id=team_id,
-            receiver_id=team_id,
+            creator_id=self.team_id,
+            receiver_id=self.team_id,
             challenge_id=self.id,
             created_at=datetime.now(),
         )
-        # Add to session instead of just appending to relationship
-        db_session.add(failure_penalty_offset)
-        db_session.flush()  # Get the ID
         self.offsets.append(failure_penalty_offset)
-
         for offset in bonus_offsets:
-            db_session.add(offset)
             self.offsets.append(offset)
         for modifier in bonus_modifiers:
-            db_session.add(modifier)
             self.modifiers.append(modifier)
+        if db_session:
+            db_session.commit()
+
 
 
 
