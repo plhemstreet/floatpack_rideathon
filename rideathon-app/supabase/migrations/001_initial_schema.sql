@@ -130,7 +130,23 @@ CREATE POLICY "Enable read access for all users" ON gpx_cleanups FOR SELECT USIN
 CREATE POLICY "Enable read access for all users" ON scorecards FOR SELECT USING (true);
 
 -- For write operations, you'll want to add authentication-based policies
--- Example: CREATE POLICY "Enable insert for authenticated users only" ON teams FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+-- Enable insert access for all users (for development)
+CREATE POLICY "Enable insert access for all users" ON teams FOR INSERT WITH CHECK (true);
+CREATE POLICY "Enable insert access for all users" ON challenges FOR INSERT WITH CHECK (true);
+CREATE POLICY "Enable insert access for all users" ON modifiers FOR INSERT WITH CHECK (true);
+CREATE POLICY "Enable insert access for all users" ON offsets FOR INSERT WITH CHECK (true);
+CREATE POLICY "Enable insert access for all users" ON gpx_uploads FOR INSERT WITH CHECK (true);
+CREATE POLICY "Enable insert access for all users" ON gpx_cleanups FOR INSERT WITH CHECK (true);
+CREATE POLICY "Enable insert access for all users" ON scorecards FOR INSERT WITH CHECK (true);
+
+-- Enable update access for all users (for development)
+CREATE POLICY "Enable update access for all users" ON teams FOR UPDATE USING (true);
+CREATE POLICY "Enable update access for all users" ON challenges FOR UPDATE USING (true);
+CREATE POLICY "Enable update access for all users" ON modifiers FOR UPDATE USING (true);
+CREATE POLICY "Enable update access for all users" ON offsets FOR UPDATE USING (true);
+CREATE POLICY "Enable update access for all users" ON gpx_uploads FOR UPDATE USING (true);
+CREATE POLICY "Enable update access for all users" ON gpx_cleanups FOR UPDATE USING (true);
+CREATE POLICY "Enable update access for all users" ON scorecards FOR UPDATE USING (true);
 
 -- Create views for easier querying
 CREATE VIEW team_scores AS
