@@ -23,8 +23,8 @@ class TestDatabaseModels(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up test database"""
-        # Use in-memory SQLite database for testing
-        cls.engine = create_engine('sqlite:///:memory:', echo=False)
+        # Use file-based SQLite database for testing (so we can inspect the data)
+        cls.engine = create_engine('sqlite:///test.db', echo=False)
         cls.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=cls.engine)
         
         # Create all tables
@@ -32,12 +32,17 @@ class TestDatabaseModels(unittest.TestCase):
     
     def setUp(self):
         """Set up each test with a fresh database session"""
+        # Clear all tables before each test to ensure test isolation
+        Base.metadata.drop_all(bind=self.engine)
+        Base.metadata.create_all(bind=self.engine)
+        
         self.db = self.SessionLocal()
     
     def tearDown(self):
         """Clean up after each test"""
         self.db.rollback()
         self.db.close()
+
     
     def test_create_teams(self):
         """Test creating team records"""
@@ -274,7 +279,7 @@ class TestDatabaseModels(unittest.TestCase):
         
         # Test forfeiting a challenge
         initial_offset_count = self.db.query(Offset).count()
-        challenge.forfeit_challenge(team.id, failure_penalty=3.0)
+        challenge.forfeit_challenge(team.id, self.db, failure_penalty=3.0)
         
         self.assertEqual(challenge.status, ChallengeStatus.FORFEITED)
         self.assertIsNotNone(challenge.end)
@@ -327,43 +332,51 @@ class TestDatabaseModels(unittest.TestCase):
         
         self.db.flush()
         
-        # Create challenges
-        challenges_data = [
+        # Create challenge templates
+        challenge_templates = [
             {
                 "name": "Mountain Climb",
                 "description": "Climb to the top of the nearest hill.\nReward: 3 miles.",
-                "uuid": "mountain-climb-001",
                 "latitude": 39.7392,
                 "longitude": -104.9903
             },
             {
                 "name": "Scavenger Hunt",
                 "description": "Find 5 hidden items around the city.\nReward: 2 miles.",
-                "uuid": "scavenger-hunt-002",
                 "latitude": 40.7589,
                 "longitude": -73.9851
             },
             {
                 "name": "Dance Battle",
                 "description": "Perform a 3-minute dance routine.\nReward: 1.5 miles.",
-                "uuid": "dance-battle-003",
                 "latitude": 34.0522,
                 "longitude": -118.2437
             }
         ]
         
+        # Create individual challenge instances for each team
         challenges = []
-        for challenge_data in challenges_data:
-            challenge = Challenge(**challenge_data, status=ChallengeStatus.AVAILABLE)
-            self.db.add(challenge)
-            challenges.append(challenge)
+        for template_idx, template in enumerate(challenge_templates):
+            for team_idx, team in enumerate(teams):
+                challenge = Challenge(
+                    name=template["name"],
+                    description=template["description"],
+                    uuid=f"{template['name'].lower().replace(' ', '-')}-{team_idx + 1:03d}",
+                    latitude=template["latitude"],
+                    longitude=template["longitude"],
+                    status=ChallengeStatus.AVAILABLE,
+                    team_id=team.id  # Each challenge belongs to a specific team
+                )
+                self.db.add(challenge)
+                challenges.append(challenge)
         
         self.db.flush()
         
-        # Create modifiers
-        for i, (team, challenge) in enumerate(zip(teams, challenges)):
+        # Create modifiers for each team-challenge combination
+        for i, challenge in enumerate(challenges):
+            team = teams[i % len(teams)]  # Cycle through teams
             modifier = Modifier(
-                multiplier=1.0 + (i * 0.2),  # 1.0, 1.2, 1.4
+                multiplier=1.0 + (i * 0.1),  # Incrementing multipliers
                 creator_id=team.id,
                 receiver_id=team.id,
                 challenge_id=challenge.id,
@@ -371,10 +384,11 @@ class TestDatabaseModels(unittest.TestCase):
             )
             self.db.add(modifier)
         
-        # Create offsets
-        for i, (team, challenge) in enumerate(zip(teams, challenges)):
+        # Create offsets for each team-challenge combination
+        for i, challenge in enumerate(challenges):
+            team = teams[i % len(teams)]  # Cycle through teams
             offset = Offset(
-                distance=1.0 + i,  # 1.0, 2.0, 3.0
+                distance=1.0 + (i * 0.5),  # Incrementing distances
                 creator_id=team.id,
                 receiver_id=team.id,
                 challenge_id=challenge.id,
@@ -386,18 +400,25 @@ class TestDatabaseModels(unittest.TestCase):
         
         # Verify all data was created
         self.assertEqual(self.db.query(Team).count(), 3)
-        self.assertEqual(self.db.query(Challenge).count(), 3)
-        self.assertEqual(self.db.query(Modifier).count(), 3)
-        self.assertEqual(self.db.query(Offset).count(), 3)
+        self.assertEqual(self.db.query(Challenge).count(), 9)  # 3 teams × 3 challenges = 9
+        self.assertEqual(self.db.query(Modifier).count(), 9)   # 9 modifiers for 9 challenges
+        self.assertEqual(self.db.query(Offset).count(), 9)      # 9 offsets for 9 challenges
         
         # Verify relationships work
         first_team = teams[0]
-        self.assertEqual(len(first_team.modifiers_created), 1)
-        self.assertEqual(len(first_team.offsets_created), 1)
+        self.assertEqual(len(first_team.modifiers_created), 3)  # 3 challenges per team
+        self.assertEqual(len(first_team.offsets_created), 3)     # 3 challenges per team
         
-        first_challenge = challenges[0]
-        self.assertEqual(len(first_challenge.modifiers), 1)
-        self.assertEqual(len(first_challenge.offsets), 1)
+        # Verify each team has 3 challenges
+        for team in teams:
+            team_challenges = self.db.query(Challenge).filter(Challenge.team_id == team.id).all()
+            self.assertEqual(len(team_challenges), 3)
+            
+        # Verify each challenge belongs to exactly one team
+        for challenge in challenges:
+            self.assertIsNotNone(challenge.team_id)
+            self.assertEqual(len(challenge.modifiers), 1)
+            self.assertEqual(len(challenge.offsets), 1)
 
 
 if __name__ == '__main__':

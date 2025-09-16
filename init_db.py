@@ -5,7 +5,7 @@ Creates tables and populates with initial data
 """
 
 from database import create_tables, SessionLocal, engine
-from datamodels.challenge import Challenge, ChallengeStatus, get_sample_challenges
+from datamodels.challenge import Challenge, ChallengeStatus
 from datamodels.team import Team
 from datamodels.modifier import Modifier
 from datamodels.offset import Offset

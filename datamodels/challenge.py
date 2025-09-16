@@ -51,7 +51,7 @@ class Challenge(Base):
         if self.pause_distance and self.modifiers:
             self.modifiers[0].end = datetime.now()
     
-    def forfeit_challenge(self, team_id: int, failure_penalty: float = 5, bonus_offsets: list = [], bonus_modifiers: list = []):
+    def forfeit_challenge(self, team_id: int, db_session, failure_penalty: float = 5, bonus_offsets: list = [], bonus_modifiers: list = []):
         self.status = ChallengeStatus.FORFEITED
         self.end = datetime.now()
         if self.pause_distance and self.modifiers:
@@ -65,12 +65,18 @@ class Challenge(Base):
             challenge_id=self.id,
             created_at=datetime.now(),
         )
+        # Add to session instead of just appending to relationship
+        db_session.add(failure_penalty_offset)
+        db_session.flush()  # Get the ID
         self.offsets.append(failure_penalty_offset)
 
         for offset in bonus_offsets:
+            db_session.add(offset)
             self.offsets.append(offset)
         for modifier in bonus_modifiers:
+            db_session.add(modifier)
             self.modifiers.append(modifier)
 
 
-# Sample challenge data - create instances in init_db.py instead
+
+
