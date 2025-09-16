@@ -34,71 +34,80 @@ export default function HomeScreen() {
   if (!team) return null;
 
   return (
-    <SafeAreaView className="flex-1 bg-light">
-      <ScrollView className="flex-1 px-4">
+    <View className="flex-1 sunset-gradient">
+      <ScrollView className="flex-1 px-6">
         {/* Team Info Card */}
-        <View className="bg-white rounded-2xl p-6 mt-4 shadow-sm">
-          <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-2xl font-bold text-dark">{team.name}</Text>
+        <View className="sunset-card p-8 mt-12">
+          <View className="flex-row items-center justify-between mb-6">
+            <Text className="text-3xl font-bold text-dark">{team.name}</Text>
             <View
-              className="w-8 h-8 rounded-full"
+              className="w-12 h-12 rounded-2xl"
               style={{ backgroundColor: team.color }}
             />
           </View>
           
-          <View className="space-y-2">
+          <View className="space-y-3">
             <View className="flex-row items-center">
-              <Ionicons name="people-outline" size={20} color="#6B7280" />
-              <Text className="ml-2 text-gray-600">Members:</Text>
+              <View className="w-10 h-10 sunset-gradient rounded-xl items-center justify-center mr-3">
+                <Ionicons name="people-outline" size={24} color="white" />
+              </View>
+              <Text className="text-sunset-600 text-lg font-semibold">Members:</Text>
             </View>
-            <Text className="text-base text-dark ml-7">{team.members}</Text>
+            <Text className="text-2xl font-bold text-dark ml-13">{team.members}</Text>
           </View>
+          <View className="h-1 sunset-gradient rounded-full mt-6"></View>
         </View>
 
         {/* Quick Reference Card */}
-        <View className="bg-white rounded-2xl p-6 mt-4 shadow-sm">
-          <Text className="text-xl font-bold text-dark mb-4">Quick Reference</Text>
+        <View className="sunset-card p-8 mt-6">
+          <Text className="text-2xl font-bold text-dark mb-6">Quick Reference</Text>
           
           <TouchableOpacity
             onPress={handlePhoneCall}
-            className="flex-row items-center justify-between bg-primary/10 rounded-lg p-4"
+            className="flex-row items-center justify-between bg-sunset-100 rounded-2xl p-6"
           >
             <View className="flex-row items-center">
-              <Ionicons name="call-outline" size={24} color="#4ECDC4" />
-              <View className="ml-3">
-                <Text className="text-sm text-gray-600">Leon's Phone</Text>
-                <Text className="text-base font-semibold text-dark">
+              <View className="w-12 h-12 sunset-gradient rounded-xl items-center justify-center mr-4">
+                <Ionicons name="call-outline" size={24} color="white" />
+              </View>
+              <View>
+                <Text className="text-sunset-600 text-base font-semibold">Leon's Phone</Text>
+                <Text className="text-xl font-bold text-dark">
                   1-800-867-5309
                 </Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#4ECDC4" />
+            <Ionicons name="chevron-forward" size={24} color="#f2760a" />
           </TouchableOpacity>
         </View>
 
         {/* Quick Actions */}
-        <View className="bg-white rounded-2xl p-6 mt-4 shadow-sm">
-          <Text className="text-xl font-bold text-dark mb-4">Quick Actions</Text>
+        <View className="sunset-card p-8 mt-6">
+          <Text className="text-2xl font-bold text-dark mb-6">Quick Actions</Text>
           
-          <View className="space-y-3">
-            <TouchableOpacity className="flex-row items-center justify-between bg-accent/10 rounded-lg p-4">
+          <View className="space-y-4">
+            <TouchableOpacity className="flex-row items-center justify-between bg-sky-100 rounded-2xl p-6">
               <View className="flex-row items-center">
-                <Ionicons name="camera-outline" size={24} color="#45B7D1" />
-                <Text className="ml-3 text-base font-medium text-dark">
+                <View className="w-12 h-12 bg-sky-500 rounded-xl items-center justify-center mr-4">
+                  <Ionicons name="camera-outline" size={24} color="white" />
+                </View>
+                <Text className="text-xl font-bold text-dark">
                   Upload GPX File
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#45B7D1" />
+              <Ionicons name="chevron-forward" size={24} color="#0ea5e9" />
             </TouchableOpacity>
 
-            <TouchableOpacity className="flex-row items-center justify-between bg-secondary/10 rounded-lg p-4">
+            <TouchableOpacity className="flex-row items-center justify-between bg-lavender-100 rounded-2xl p-6">
               <View className="flex-row items-center">
-                <Ionicons name="qr-code-outline" size={24} color="#FF6B6B" />
-                <Text className="ml-3 text-base font-medium text-dark">
+                <View className="w-12 h-12 bg-lavender-500 rounded-xl items-center justify-center mr-4">
+                  <Ionicons name="qr-code-outline" size={24} color="white" />
+                </View>
+                <Text className="text-xl font-bold text-dark">
                   Scan Challenge QR
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#FF6B6B" />
+              <Ionicons name="chevron-forward" size={24} color="#a855f7" />
             </TouchableOpacity>
           </View>
         </View>
@@ -106,13 +115,13 @@ export default function HomeScreen() {
         {/* Logout Button */}
         <TouchableOpacity
           onPress={handleLogout}
-          className="bg-red-500 rounded-lg py-4 mt-6 mb-8"
+          className="sunset-button-secondary mt-8 mb-20"
         >
-          <Text className="text-white text-center font-bold text-base">
+          <Text className="text-white text-center font-bold text-xl">
             Logout
           </Text>
         </TouchableOpacity>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

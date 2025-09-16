@@ -23,7 +23,7 @@ export default function ScoreboardScreen() {
     else setIsLoading(true);
 
     try {
-      const data = await dbHelpers.getLatestScorecards();
+      const data = await dbHelpers.getScorecards();
       setScorecards(data || []);
       setLastUpdated(new Date());
     } catch (error) {
@@ -64,39 +64,54 @@ export default function ScoreboardScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-light justify-center items-center">
-        <ActivityIndicator size="large" color="#4ECDC4" />
-      </SafeAreaView>
+      <View className="flex-1 sunset-gradient justify-center items-center">
+        <View className="sunset-card p-8 items-center">
+          <ActivityIndicator size="large" color="white" />
+          <Text className="text-white font-medium mt-4 text-lg">Loading scoreboard...</Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-light">
+    <View className="flex-1 sunset-gradient">
       <ScrollView
         className="flex-1"
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={() => fetchScorecards(true)}
-            colors={['#4ECDC4']}
+            colors={['white']}
           />
         }
       >
         {/* Last Updated */}
         {lastUpdated && (
-          <View className="bg-primary/10 px-4 py-2">
-            <Text className="text-center text-sm text-gray-600">
+          <View className="bg-white/20 px-6 py-4">
+            <Text className="text-center text-white font-semibold">
               Last Updated: {format(lastUpdated, 'MMM dd, yyyy HH:mm:ss')}
             </Text>
           </View>
         )}
 
         {/* Leaderboard */}
-        <View className="px-4 py-4">
+        <View className="px-6 py-6">
+          <View className="sunset-card p-6 mb-6">
+            <View className="flex-row items-center mb-4">
+              <View className="w-12 h-12 bg-white rounded-2xl items-center justify-center mr-4">
+                <Ionicons name="trophy" size={24} color="#f2760a" />
+              </View>
+              <Text className="text-3xl font-bold text-white">Leaderboard</Text>
+            </View>
+            <View className="h-1 bg-white/30 rounded-full"></View>
+          </View>
+          
           {sortedScorecards.length === 0 ? (
-            <View className="bg-white rounded-2xl p-8 items-center">
-              <Ionicons name="trophy-outline" size={48} color="#9CA3AF" />
-              <Text className="text-gray-500 mt-4 text-center">
+            <View className="sunset-card-elevated p-10 items-center">
+              <View className="w-20 h-20 sunset-gradient rounded-full items-center justify-center mb-6">
+                <Ionicons name="trophy-outline" size={40} color="white" />
+              </View>
+              <Text className="text-sunset-600 text-xl font-bold text-center">
                 No scorecard data available yet
               </Text>
             </View>
@@ -104,39 +119,39 @@ export default function ScoreboardScreen() {
             sortedScorecards.map((scorecard, index) => (
               <View
                 key={scorecard.id}
-                className={`bg-white rounded-2xl p-4 mb-3 shadow-sm ${
-                  index === 0 ? 'border-2 border-yellow-400' : ''
+                className={`sunset-card p-6 mb-4 ${
+                  index === 0 ? 'border-4 border-warning' : ''
                 }`}
               >
                 {/* Rank and Team Name */}
-                <View className="flex-row items-center justify-between mb-3">
+                <View className="flex-row items-center justify-between mb-6">
                   <View className="flex-row items-center">
                     <View
-                      className={`w-10 h-10 rounded-full items-center justify-center ${
+                      className={`w-14 h-14 rounded-2xl items-center justify-center ${
                         index === 0
-                          ? 'bg-yellow-400'
+                          ? 'bg-warning'
                           : index === 1
-                          ? 'bg-gray-400'
+                          ? 'bg-sky-500'
                           : index === 2
-                          ? 'bg-orange-400'
-                          : 'bg-gray-200'
+                          ? 'bg-lavender-500'
+                          : 'bg-white/20'
                       }`}
                     >
                       <Text
-                        className={`font-bold ${
-                          index < 3 ? 'text-white' : 'text-gray-600'
+                        className={`font-bold text-2xl ${
+                          index < 3 ? 'text-white' : 'text-white'
                         }`}
                       >
                         {index + 1}
                       </Text>
                     </View>
-                    <Text className="ml-3 text-lg font-bold text-dark">
+                    <Text className="ml-4 text-2xl font-bold text-white">
                       {scorecard.team?.name || `Team ${scorecard.team_id}`}
                     </Text>
                   </View>
                   {scorecard.team?.color && (
                     <View
-                      className="w-6 h-6 rounded-full"
+                      className="w-8 h-8 rounded-xl"
                       style={{ backgroundColor: scorecard.team.color }}
                     />
                   )}
@@ -145,37 +160,43 @@ export default function ScoreboardScreen() {
                 {/* Stats */}
                 <View className="flex-row justify-between">
                   <View className="flex-1 items-center">
-                    <View className="flex-row items-center">
-                      <Ionicons name="flag" size={16} color="#6B7280" />
-                      <Text className="ml-1 text-xs text-gray-600">
+                    <View className="flex-row items-center mb-2">
+                      <View className="w-8 h-8 bg-sunset-100 rounded-xl items-center justify-center mr-2">
+                        <Ionicons name="flag" size={18} color="#f2760a" />
+                      </View>
+                      <Text className="text-sunset-600 font-semibold">
                         Challenges
                       </Text>
                     </View>
-                    <Text className="text-lg font-bold text-primary mt-1">
+                    <Text className="text-2xl font-bold text-primary">
                       {scorecard.challenges_completed}
                     </Text>
                   </View>
 
-                  <View className="flex-1 items-center border-l border-r border-gray-200">
-                    <View className="flex-row items-center">
-                      <Ionicons name="bicycle" size={16} color="#6B7280" />
-                      <Text className="ml-1 text-xs text-gray-600">
+                  <View className="flex-1 items-center border-l-2 border-r-2 border-sunset-200">
+                    <View className="flex-row items-center mb-2">
+                      <View className="w-8 h-8 bg-sky-100 rounded-xl items-center justify-center mr-2">
+                        <Ionicons name="bicycle" size={18} color="#0ea5e9" />
+                      </View>
+                      <Text className="text-sky-600 font-semibold">
                         Traveled
                       </Text>
                     </View>
-                    <Text className="text-lg font-bold text-accent mt-1">
+                    <Text className="text-2xl font-bold text-sky-600">
                       {scorecard.distance_traveled.toFixed(1)} mi
                     </Text>
                   </View>
 
                   <View className="flex-1 items-center">
-                    <View className="flex-row items-center">
-                      <Ionicons name="star" size={16} color="#6B7280" />
-                      <Text className="ml-1 text-xs text-gray-600">
+                    <View className="flex-row items-center mb-2">
+                      <View className="w-8 h-8 bg-lavender-100 rounded-xl items-center justify-center mr-2">
+                        <Ionicons name="star" size={18} color="#a855f7" />
+                      </View>
+                      <Text className="text-lavender-600 font-semibold">
                         Earned
                       </Text>
                     </View>
-                    <Text className="text-lg font-bold text-secondary mt-1">
+                    <Text className="text-2xl font-bold text-lavender-600">
                       {scorecard.distance_earned.toFixed(1)} mi
                     </Text>
                   </View>
@@ -183,7 +204,7 @@ export default function ScoreboardScreen() {
 
                 {/* Last Updated */}
                 {scorecard.created_at && (
-                  <Text className="text-xs text-gray-500 text-center mt-3">
+                  <Text className="text-sunset-500 text-center mt-4 font-medium">
                     Updated: {format(new Date(scorecard.created_at), 'MMM dd, HH:mm')}
                   </Text>
                 )}
@@ -192,6 +213,6 @@ export default function ScoreboardScreen() {
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
