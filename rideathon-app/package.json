@@ -12,6 +12,7 @@
     "build:all": "eas build --platform all"
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-navigation/bottom-tabs": "^7.4.7",
     "@react-navigation/native": "^7.1.17",
@@ -27,15 +28,16 @@
     "expo-status-bar": "~3.0.8",
     "nativewind": "^4.2.1",
     "react": "19.1.0",
+    "react-dom": "19.1.0",
     "react-native": "0.81.4",
+    "react-native-maps": "^1.26.6",
     "react-native-qrcode-svg": "^6.3.15",
     "react-native-safe-area-context": "^5.6.1",
     "react-native-screens": "^4.16.0",
     "react-native-svg": "15.12.1",
+    "react-native-web": "^0.21.0",
     "tailwindcss": "^3.4.17",
-    "zustand": "^5.0.8",
-    "react-dom": "19.1.0",
-    "react-native-web": "^0.21.0"
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",

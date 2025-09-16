@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Camera, CameraView } from 'expo-camera';
@@ -26,6 +27,7 @@ export default function ChallengesScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showMap, setShowMap] = useState(false);
 
   const fetchChallenges = async (isRefresh = false) => {
     if (!team) return;
@@ -34,7 +36,7 @@ export default function ChallengesScreen() {
     else setIsLoading(true);
 
     try {
-      const data = await dbHelpers.getChallenges(team.id);
+      const data = await dbHelpers.getChallenges();
       setChallenges(data || []);
     } catch (error) {
       console.error('Error fetching challenges:', error);
@@ -118,6 +120,7 @@ export default function ChallengesScreen() {
           receiver_id: team.id,
           challenge_id: challenge.id,
           start: new Date().toISOString(),
+          created_at: new Date().toISOString(),
         });
       }
       
@@ -171,6 +174,7 @@ export default function ChallengesScreen() {
                 creator_id: team.id,
                 receiver_id: team.id,
                 challenge_id: challenge.id,
+                created_at: new Date().toISOString(),
               });
               
               Alert.alert('Challenge Forfeited', 'A -5 mile penalty has been applied');
@@ -203,7 +207,7 @@ export default function ChallengesScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-light justify-center items-center">
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F9FA', justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#4ECDC4" />
       </SafeAreaView>
     );
@@ -233,8 +237,22 @@ export default function ChallengesScreen() {
             </Text>
           </TouchableOpacity>
         </View>
-
-        {/* Challenges List */}
+        {/* Challenge Map */}
+        <View className="px-4 py-4">
+          <TouchableOpacity onPress={() => setShowMap(!showMap)}>
+            <Text className="text-xl font-bold text-dark mb-3">
+              Challenge Map {showMap ? '▼' : '▶'}
+            </Text>
+          </TouchableOpacity>
+          {showMap && (
+            <Image 
+              source={require('../../assets/sf_map.png')} 
+              style={{ width: '100%', height: 200 }} 
+              resizeMode="contain"
+            />
+          )}
+        </View>
+        {/* Challenges List */}   
         <View className="px-4 py-4">
           <Text className="text-xl font-bold text-dark mb-3">Your Challenges</Text>
           
